@@ -13,7 +13,7 @@ export const metadata = {
   description: 'Admin Portal',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
