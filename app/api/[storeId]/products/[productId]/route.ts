@@ -20,7 +20,7 @@ export async function GET(
         images: true,
         category: true,
         size: true,
-        color: true
+        color: true,
       }
     });
   
@@ -49,7 +49,7 @@ export async function DELETE(
     const storeByUserId = await prismadb.store.findFirst({
       where: {
         id: params.storeId,
-        userId,
+        userId
       }
     });
 
@@ -57,10 +57,10 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 405 });
     }
 
-    const product = await prismadb.product.deleteMany({
+    const product = await prismadb.product.delete({
       where: {
-        id: params.productId,
-      }
+        id: params.productId
+      },
     });
   
     return NextResponse.json(product);
@@ -75,24 +75,19 @@ export async function PATCH(
   req: Request,
   { params }: { params: { productId: string, storeId: string } }
 ) {
-  try {   
+  try {
     const { userId } = auth();
 
     const body = await req.json();
-    
-    const {
-      name, 
-      price, 
-      categoryId,
-      colorId,
-      sizeId,
-      images,
-      isFeatured,
-      isArchived
-    } = body;
-    
+
+    const { name, price, categoryId, images, colorId, sizeId, isFeatured, isArchived } = body;
+
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 403 });
+    }
+
+    if (!params.productId) {
+      return new NextResponse("Product id is required", { status: 400 });
     }
 
     if (!name) {
@@ -119,14 +114,10 @@ export async function PATCH(
       return new NextResponse("Size id is required", { status: 400 });
     }
 
-    if (!params.productId) {
-      return new NextResponse("Product id is required", { status: 400 });
-    }
-
     const storeByUserId = await prismadb.store.findFirst({
       where: {
         id: params.storeId,
-        userId,
+        userId
       }
     });
 
@@ -136,7 +127,7 @@ export async function PATCH(
 
     await prismadb.product.update({
       where: {
-        id: params.productId,
+        id: params.productId
       },
       data: {
         name,
@@ -145,11 +136,11 @@ export async function PATCH(
         colorId,
         sizeId,
         images: {
-          deleteMany: {}
+          deleteMany: {},
         },
         isFeatured,
-        isArchived
-      }
+        isArchived,
+      },
     });
 
     const product = await prismadb.product.update({
@@ -161,10 +152,10 @@ export async function PATCH(
           createMany: {
             data: [
               ...images.map((image: { url: string }) => image),
-            ]
-          }
-        }
-      }
+            ],
+          },
+        },
+      },
     })
   
     return NextResponse.json(product);
