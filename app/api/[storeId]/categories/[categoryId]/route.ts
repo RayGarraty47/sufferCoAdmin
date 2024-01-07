@@ -5,16 +5,19 @@ import prismadb from "@/lib/prismadb";
 
 export async function GET(
   req: Request,
-  { params }: { params: { catergoryId: string } }
+  { params }: { params: { categoryId: string } }
 ) {
   try {
-    if (!params.catergoryId) {
+    if (!params.categoryId) {
       return new NextResponse("Category id is required", { status: 400 });
     }
 
     const category = await prismadb.category.findUnique({
       where: {
-        id: params.catergoryId
+        id: params.categoryId
+      },
+      include: {
+        billboard: true
       }
     });
   
@@ -64,6 +67,7 @@ export async function DELETE(
   }
 };
 
+
 export async function PATCH(
   req: Request,
   { params }: { params: { categoryId: string, storeId: string } }
@@ -79,12 +83,12 @@ export async function PATCH(
       return new NextResponse("Unauthenticated", { status: 403 });
     }
 
-    if (!name) {
-      return new NextResponse("Name is required", { status: 400 });
+    if (!billboardId) {
+      return new NextResponse("Billboard ID is required", { status: 400 });
     }
 
-    if (!billboardId) {
-      return new NextResponse("Billboard id is required", { status: 400 });
+    if (!name) {
+      return new NextResponse("Name is required", { status: 400 });
     }
 
     if (!params.categoryId) {
@@ -94,7 +98,7 @@ export async function PATCH(
     const storeByUserId = await prismadb.store.findFirst({
       where: {
         id: params.storeId,
-        userId
+        userId,
       }
     });
 
